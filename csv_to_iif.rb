@@ -1,17 +1,27 @@
- require 'ostruct'
- require 'csv'
+# csv_to_iif
+# created and copyright 2011: Mark Friedgan (hubrix@hubrix.com)
+# 
+# input file format: date, transaction, kind, vendor, customer, source, dest
+# date: mm/dd/yy
+# transaction: -xxxxx.xx
+# kind: bill/deposit
+# vendor/customer: matches existing vendor/customers in quickbooks or will be added
+# source/dest: matches existing accounts in quickbooks or might get added (careful as adding may place in wrong category)
 
- (STDERR.puts "#{__FILE__} input_file.csv {output_file.iif}" or Process.exit!(-1)) unless ARGV[0]
- input_filename = ARGV[0]
- output_filename = ARGV[1]
- output = output_filename ? File.open(output_filename, "w+") : STDOUT
- file = File.read(input_filename).gsub("\r","\n")
- file_array = CSV.parse(file)
- #CSV Required Columns
- #kind, transaction, date, source, dest, customer, vendor, qbmemo
+require 'ostruct'
+require 'csv'
 
- headers = file_array.shift
- recordset = file_array.collect {|record| OpenStruct.new(Hash[*headers.zip(record).flatten]) }
+(STDERR.puts "#{__FILE__} input_file.csv {output_file.iif}" or Process.exit!(-1)) unless ARGV[0]
+input_filename = ARGV[0]
+output_filename = ARGV[1]
+output = output_filename ? File.open(output_filename, "w+") : STDOUT
+file = File.read(input_filename).gsub("\r","\n")
+file_array = CSV.parse(file)
+#CSV Required Columns
+#kind, transaction, date, source, dest, customer, vendor, qbmemo
+
+headers = file_array.shift
+recordset = file_array.collect {|record| OpenStruct.new(Hash[*headers.zip(record).flatten]) }
 
 
 #####   CUSTOMERS
