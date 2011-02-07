@@ -19,6 +19,7 @@ output_filename = ARGV[1]
 output = output_filename ? File.open(output_filename, "w+") : STDOUT
 file = File.read(input_filename).gsub("\r","\n")
 file_array = CSV.parse(file)
+file_array[0].each{|x| x.downcase} #so that all headers a lowercase, uses like to use uppercase and not realize what they are doing
 headers = file_array.shift
 recordset = file_array.collect {|record| OpenStruct.new(Hash[*headers.zip(record).flatten]) }
 
