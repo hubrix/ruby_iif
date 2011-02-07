@@ -7,12 +7,12 @@
 # kind: bill/deposit
 # vendor/customer: matches existing vendor/customers in quickbooks or will be added
 # source/dest: matches existing accounts in quickbooks or might get added (careful as adding may place in wrong category)
-# qbmemo: will end up as memo in quickbooks
+# qbmemo: will end up as memo in quickbooks (memo is also acceptable, qbmemo is provided in case memo column exists but one wishes to create a more complex formulaic memo)
 
 require 'ostruct'
 require 'csv'
 
-(STDERR.puts "#{__FILE__} input_file.csv {output_file.iif}" or Process.exit!(-1)) unless ARGV[0]
+(STDERR.puts "Error:#{__FILE__} input_file.csv {output_file.iif}" or Process.exit!(-1)) unless ARGV[0]
 
 input_filename = ARGV[0]
 output_filename = ARGV[1]
@@ -20,6 +20,14 @@ output = output_filename ? File.open(output_filename, "w+") : STDOUT
 file = File.read(input_filename).gsub("\r","\n")
 file_array = CSV.parse(file)
 headers = file_array.shift.collect{|x| x.downcase}
+(STDERR.puts "Error: #{input_filename} headers(#{headers.join(',')})\ must include: date, transaction, kind, vendor, customer, source, dest, (qbmemo or memo)" or Process.exit(-1)) unless headers.include?('date') && 
+			headers.include?('transaction') && 
+			headers.include?('kind') && 
+			headers.include?('vendor') && 
+			headers.include?('customer') && 
+			headers.include?('source') && 
+			headers.include?('dest') && 
+			(headers.include?('qbmemo') || headers.include?('memo')) 
 recordset = file_array.collect {|record| OpenStruct.new(Hash[*headers.zip(record).flatten]) }
 
 
@@ -59,8 +67,8 @@ output.puts "!ENDTRNS"
   name1 = record.vendor
   name2 = record.kind == "bill" ? record.vendor : record.customer
   #trn
-  output.puts "TRNS		#{kind}	#{date}	#{record.source}	#{name1}	#{record.transaction.to_f}		#{record.qbmemo}	N" 
+  output.puts "TRNS		#{kind}	#{date}	#{record.source}	#{name1}	#{record.transaction.to_f}		#{record.qbmemo || record.memo}	N" 
   #spl 
-  output.puts "SPL		#{kind}	#{date}	#{record.dest}	#{name2}	#{-record.transaction.to_f}		#{record.qbmemo}	N"
+  output.puts "SPL		#{kind}	#{date}	#{record.dest}	#{name2}	#{-record.transaction.to_f}		#{record.qbmemo || record.memo}	N"
   output.puts "ENDTRNS"
  end
