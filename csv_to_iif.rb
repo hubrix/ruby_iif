@@ -1,5 +1,5 @@
 # csv_to_iif
-# created and copyright 2011: Mark Friedgan (hubrix@hubrix.com)
+# created and copyright 2011: Mark Friedgan
 # 
 # input file format: date, transaction, kind, vendor, customer, source, dest, qbmemo
 # date: mm/dd/yy
